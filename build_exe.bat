@@ -9,14 +9,14 @@ echo   Jachbit 2026
 echo ========================================
 echo.
 
-python -m PyInstaller --version >nul 2>nul
+python -c "import PyInstaller, flask, webview" >nul 2>nul
 if errorlevel 1 (
     echo  Installing the build tools - one time only...
     python -m pip install -r requirements.txt pyinstaller
     echo.
 )
 
-python -m PyInstaller --onefile --clean --noconfirm --name FOCUS-Backup --add-data "templates;templates" server.py
+python -m PyInstaller --onefile --noconsole --clean --noconfirm --name FOCUS-Backup --icon assets\icon.ico --add-data "templates;templates" server.py
 if errorlevel 1 (
     echo.
     echo  BUILD FAILED - see the messages above.

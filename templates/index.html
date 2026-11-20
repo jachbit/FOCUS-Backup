@@ -308,7 +308,7 @@ function fillSources(selected) {
   $('s-source-sel').value = selected || '';
 }
 async function browseSource() {
-  $('s-source-info').innerHTML = 'A <b>Select Folder</b> window is open - it may be behind this browser window.';
+  $('s-source-info').innerHTML = 'A <b>Select Folder</b> window is open - pick the folder there.';
   try {
     const j = await api('/api/browse', { start: curSource() });
     if (j.path) fillSources(j.path); else $('s-source-sel').value = CFG.config.source || '';

@@ -2,7 +2,7 @@
 
 **Back up a folder to an external disk. The first run copies everything; every run after that copies only the files that are new or changed** — so a normal backup takes seconds, not hours.
 
-A small Windows app with a dashboard in your browser. It runs only on your PC — nothing is uploaded anywhere.
+A small Windows app in its own window. It runs only on your PC — nothing is uploaded anywhere.
 
 ![F.O.C.U.S. Backup dashboard](docs/screenshot.jpg)
 
@@ -10,9 +10,9 @@ A small Windows app with a dashboard in your browser. It runs only on your PC �
 
 1. Go to **[Releases](https://github.com/jachbit/FOCUS-Backup/releases/latest)** and download **`FOCUS-Backup.exe`**.
 2. Put it in its own folder (for example `Documents\FOCUS-Backup`) — it saves its settings next to itself.
-3. Double-click it. A small window opens and the dashboard opens in your browser.
+3. Double-click it. The **F.O.C.U.S.© Backup** window opens (it takes 2–3 seconds the first time).
 
-No Python or install needed. Windows 10 / 11 only.
+No Python or install needed. Windows 10 / 11 only. It uses **Microsoft Edge WebView2**, which is already part of Windows 11 and up-to-date Windows 10; on an older PC without it, the app tells you and opens Microsoft's free download page.
 
 > **"Windows protected your PC"?** Windows shows this for any new app downloaded from the internet that is not signed by a paid certificate. Click **More info → Run anyway**. The full source code is in this repo, and you can build the .exe yourself (see below).
 
@@ -30,7 +30,7 @@ No Python or install needed. Windows 10 / 11 only.
 
 The **History** table lists every run (files copied, data, time taken) and the top strip turns yellow when your last backup is older than the limit you set (7 days by default).
 
-To stop the app, close its small window.
+To stop the app, close its window. If a backup is still running, it asks first — files already copied stay on the disk and the next run copies the rest.
 
 ## How it decides what to copy
 
@@ -66,6 +66,8 @@ Needs Python 3.10+.
 pip install -r requirements.txt
 python server.py
 ```
+
+To use your normal browser instead of the app window (handy while editing `templates/index.html`), run `set FOCUS_BROWSER=1` first.
 
 To build `dist\FOCUS-Backup.exe` yourself, double-click **`build_exe.bat`** (it installs PyInstaller the first time).
 

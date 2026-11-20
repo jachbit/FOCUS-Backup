@@ -1,7 +1,8 @@
-"""F.O.C.U.S.(c) Backup v1.0 - Jachbit 2026 - MIT License
+"""F.O.C.U.S.(c) Backup v1.1 - Jachbit 2026 - MIT License
 
-Local-only Windows dashboard around robocopy: the first run copies everything,
-later runs copy only new / changed files.
+Windows app around robocopy: the first run copies everything, later runs copy only
+new / changed files. The dashboard runs on a local-only server and is shown in its
+own app window (pywebview + Microsoft Edge WebView2).
 """
 import ctypes
 import json
@@ -18,9 +19,12 @@ from datetime import datetime
 from pathlib import Path
 
 from flask import Flask, jsonify, render_template, request
+from werkzeug.serving import make_server
 
-VERSION = "1.0"
+VERSION = "1.1"
 FROZEN = getattr(sys, "frozen", False)
+WINDOW = {"w": None}
+WEBVIEW2_URL = "https://developer.microsoft.com/microsoft-edge/webview2/"
 # as an .exe: settings live next to the .exe, the page is unpacked to a temp folder
 APP_DIR = Path(sys.executable).resolve().parent if FROZEN else Path(__file__).resolve().parent
 TEMPLATE_DIR = Path(getattr(sys, "_MEIPASS", APP_DIR)) / "templates"
@@ -394,10 +398,17 @@ def folder_size(path, skip_rebuildable):
 
 @app.route("/api/browse", methods=["POST"])
 def api_browse():
-    # the dashboard only runs on this PC, so the normal Windows folder picker opens here
+    start = (request.get_json(force=True) or {}).get("start") or load_config()["source"] or "C:\\"
+    win = WINDOW["w"]
+    if win is not None:
+        import webview
+        folder = getattr(getattr(webview, "FileDialog", None), "FOLDER", None) or webview.FOLDER_DIALOG
+        picked = win.create_file_dialog(folder, directory=start)
+        path = picked[0] if picked else ""
+        return jsonify({"path": os.path.normpath(path) if path else ""})
+    # running from source in a browser: the normal Windows folder picker still opens on this PC
     import tkinter
     from tkinter import filedialog
-    start = (request.get_json(force=True) or {}).get("start") or load_config()["source"] or "C:\\"
     root = tkinter.Tk()
     root.withdraw()
     root.attributes("-topmost", True)
@@ -510,14 +521,65 @@ def free_port(start):
     return start
 
 
-if __name__ == "__main__":
+def stop_backup():
+    PROC["stop"] = True
+    p = PROC["p"]
+    if p and p.poll() is None:
+        subprocess.run(["taskkill", "/PID", str(p.pid), "/T", "/F"], capture_output=True,
+                       creationflags=subprocess.CREATE_NO_WINDOW)
+
+
+def on_closing():
+    if STATE.get("running"):
+        ok = WINDOW["w"].create_confirmation_dialog(
+            "Backup running", "A backup is still running.\n\nStop it and close F.O.C.U.S. Backup?\n"
+            "Files already copied stay on the disk; the next run copies the rest.")
+        if not ok:
+            return False
+        stop_backup()
+    return True
+
+
+def message_box(text, title="F.O.C.U.S. Backup"):
+    ctypes.windll.user32.MessageBoxW(None, text, title, 0x40)
+
+
+def main():
+    if FROZEN and sys.stdout is None:
+        # the .exe has no console window; give the web server somewhere harmless to write
+        sys.stdout = sys.stderr = open(os.devnull, "w")
     cfg = load_config()
     port = free_port(int(os.environ.get("PORT", cfg["port"])))
     url = f"http://127.0.0.1:{port}"
-    print(f"\n  F.O.C.U.S.(c) Backup v{VERSION} - Jachbit 2026\n")
-    print(f"  Dashboard: {url}  (this PC only)")
-    print("  Keep this window open while you use it. Close it to stop.")
-    print("  A backup that is running stops with it.\n")
-    if os.environ.get("FOCUS_NO_BROWSER") != "1":
-        threading.Timer(1.5, lambda: webbrowser.open(url)).start()
-    app.run(host="127.0.0.1", port=port, debug=False, threaded=True)
+    server = make_server("127.0.0.1", port, app, threaded=True)
+    threading.Thread(target=server.serve_forever, daemon=True).start()
+
+    if os.environ.get("FOCUS_BROWSER") == "1":
+        # developer option: show the dashboard in the normal browser instead of the app window
+        print(f"F.O.C.U.S. Backup v{VERSION}: {url}  (Ctrl+C to stop)")
+        webbrowser.open(url)
+        try:
+            while True:
+                time.sleep(1)
+        except KeyboardInterrupt:
+            stop_backup()
+        return
+
+    import webview
+    win = webview.create_window(f"F.O.C.U.S.© Backup v{VERSION}", url, width=1300, height=880,
+                                min_size=(900, 620), background_color="#0d1b2e")
+    WINDOW["w"] = win
+    win.events.closing += on_closing
+    try:
+        webview.start(gui="edgechromium")
+    except Exception:
+        message_box("F.O.C.U.S. Backup needs Microsoft Edge WebView2, which is missing on this PC.\n\n"
+                    "It is free from Microsoft. Click OK to open the download page, install the "
+                    "\"Evergreen Bootstrapper\", then start F.O.C.U.S. Backup again.")
+        webbrowser.open(WEBVIEW2_URL)
+    stop_backup()
+    server.shutdown()
+
+
+if __name__ == "__main__":
+    main()
