@@ -1,0 +1,32 @@
+# Personal settings + run history (paths on each user's PC)
+config.json
+history_cache.json
+
+# Build output - the .exe goes to GitHub Releases, not the repo
+build/
+dist/
+*.spec
+*.exe
+
+# Credentials - never commit
+.env
+*.token
+*.key
+*.pem
+
+# Python cache / virtual environments
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# Backups and timestamped files
+backups/
+*.bak
+*_2026[0-9][0-9][0-9][0-9]_*.py
+*_2026[0-9][0-9][0-9][0-9]_*.html
+
+# OS / editor junk
+.DS_Store
+Thumbs.db
+desktop.ini

@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>F.O.C.U.S.© — Backup</title>
+<style>
+  :root {
+    --navy:   #002B5C;
+    --orange: #E65C00;
+    --yellow: #fbbf24;
+    --bluegrey: #93c5fd;
+    --blue:   #3b82f6;
+    --green:  #22c55e;
+    --red:    #ef4444;
+    --bg:     #0d1b2e;
+    --card:   #0f2340;
+    --border: #1e3a5f;
+    --white:  #e8e8e8;
+    --row-alt: rgba(255,255,255,0.03);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--white); font-family: 'Segoe UI', Arial, sans-serif; font-size: 13px; min-height: 100vh; display: flex; flex-direction: column; }
+  main { flex: 1; padding: 18px 24px; display: flex; flex-direction: column; gap: 16px; max-width: 1400px; width: 100%; margin: 0 auto; }
+
+  /* ── Header (3-column FFTP standard) ── */
+  .header { background: var(--navy); border-bottom: 3px solid var(--orange); padding: 12px 24px; display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 16px; }
+  .header-left { display: flex; flex-direction: column; gap: 2px; }
+  .brand { font-size: 22px; font-weight: 800; color: #fff; letter-spacing: 1px; }
+  .brand span { color: var(--orange); }
+  .brand .ver { font-size: 12px; color: var(--orange); font-weight: 700; margin-left: 6px; letter-spacing: 0; }
+  .hdr-subtitle { font-size: 12px; color: var(--yellow); font-weight: 700; margin: 2px 0; }
+  .hdr-copy { font-size: 12px; color: #fff; }
+  .hdr-copy a { color: var(--orange); font-weight: 700; text-decoration: none; }
+  .header-center { text-align: center; }
+  .hdr-disclaimer-title { font-size: 13px; font-weight: 800; color: var(--yellow); }
+  .hdr-disclaimer-body  { font-size: 12px; color: var(--yellow); margin-top: 2px; }
+  .header-right { display: flex; align-items: center; justify-content: flex-end; gap: 16px; }
+  .hdr-clock-wrap { text-align: right; line-height: 1.2; }
+
+  /* ── Buttons ── */
+  .btn { padding: 8px 16px; border-radius: 6px; border: none; cursor: pointer; font-size: 13px; font-weight: 700; transition: all .15s; white-space: nowrap; }
+  .btn:disabled { opacity: .45; cursor: not-allowed; }
+  .btn-primary { background: var(--orange); color: #fff; }
+  .btn-primary:hover:not(:disabled) { background: #c94e00; }
+  .btn-outline { background: transparent; color: #fff; border: 1.5px solid #fff; }
+  .btn-outline:hover:not(:disabled) { background: rgba(255,255,255,0.08); }
+  .btn-stop { background: transparent; color: #fff; border: 1.5px solid var(--red); }
+  .btn-stop:hover:not(:disabled) { background: rgba(239,68,68,0.15); }
+  .btn-big { padding: 12px 26px; font-size: 15px; }
+
+  /* ── Strip + panels ── */
+  .strip { border-radius: 8px; padding: 10px 16px; font-size: 14px; font-weight: 700; border: 1.5px solid var(--border); background: var(--card); color: #fff; }
+  .strip.ok { border-color: var(--green); }
+  .strip.ok b { color: var(--green); }
+  .strip.overdue { border-color: var(--yellow); color: var(--yellow); }
+  .strip .math { display: block; font-size: 12px; font-weight: 600; color: #fff; margin-top: 3px; }
+  .strip.overdue .math { color: var(--yellow); }
+  .grid2 { display: grid; grid-template-columns: minmax(320px, 1fr) 2fr; gap: 16px; }
+  .panel { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 14px 16px; }
+  .panel-title { color: var(--orange); font-size: 14px; font-weight: 800; text-transform: uppercase; letter-spacing: .5px; margin-bottom: 10px; display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+  .panel-title .sub { color: #fff; font-size: 12px; font-weight: 600; text-transform: none; letter-spacing: 0; }
+
+  .disk { display: flex; gap: 10px; align-items: flex-start; padding: 10px; border: 1.5px solid var(--border); border-radius: 6px; margin-bottom: 8px; cursor: pointer; }
+  .disk.sel { border-color: var(--orange); background: rgba(230,92,0,0.08); }
+  .disk input { margin-top: 3px; accent-color: var(--orange); }
+  .disk .name { font-size: 15px; font-weight: 800; color: #fff; }
+  .disk .meta { font-size: 12px; color: #fff; margin-top: 2px; }
+  .disk .tag { display: inline-block; font-size: 12px; font-weight: 700; padding: 1px 8px; border-radius: 10px; margin-left: 6px; }
+  .tag.has { background: rgba(34,197,94,0.15); color: var(--green); border: 1px solid var(--green); }
+  .tag.new { background: rgba(251,191,36,0.12); color: var(--yellow); border: 1px solid var(--yellow); }
+  .empty { color: var(--yellow); font-weight: 700; font-size: 13px; line-height: 1.5; }
+  .note { font-size: 12px; color: #fff; margin-top: 8px; line-height: 1.5; }
+  .note b { color: var(--orange); }
+
+  .run-buttons { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 12px; }
+  .bar { height: 14px; background: #0a1628; border: 1px solid var(--border); border-radius: 7px; overflow: hidden; margin: 8px 0; }
+  .bar > div { height: 100%; width: 0; background: var(--orange); transition: width .4s; }
+  .bar.indet > div { width: 30%; animation: slide 1.4s infinite ease-in-out; }
+  @keyframes slide { 0% { margin-left: -30%; } 100% { margin-left: 100%; } }
+  .phase { font-size: 15px; font-weight: 800; color: #fff; }
+  .phase.done-ok { color: var(--green); }
+  .phase.done-warn { color: var(--yellow); }
+  .mathline { font-size: 13px; color: #fff; margin-top: 4px; line-height: 1.5; }
+  .mathline b { color: var(--orange); }
+  .recent { margin-top: 8px; font-family: Consolas, monospace; font-size: 12px; color: #fff; max-height: 110px; overflow: hidden; }
+  .recent div { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .failed { margin-top: 8px; font-size: 12px; color: var(--yellow); font-weight: 600; }
+  .failed div { font-family: Consolas, monospace; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th { color: var(--orange); text-align: left; font-weight: 800; padding: 7px 8px; border-bottom: 1.5px solid var(--border); white-space: nowrap; }
+  td { padding: 6px 8px; border-bottom: 1px solid var(--border); color: #fff; font-weight: 600; white-space: nowrap; }
+  tr:nth-child(even) td { background: var(--row-alt); }
+  td.num, th.num { text-align: right; }
+  .r-ok { color: var(--green); }
+  .r-warn { color: var(--yellow); }
+  .r-test { color: var(--bluegrey); }
+  .table-wrap { overflow-x: auto; max-height: 420px; overflow-y: auto; }
+
+  /* ── Settings popup ── */
+  .modal-bg { position: fixed; inset: 0; background: rgba(0,0,0,0.6); display: none; align-items: center; justify-content: center; z-index: 50; }
+  .modal-bg.show { display: flex; }
+  .modal { background: var(--card); border: 1.5px solid var(--orange); border-radius: 10px; width: min(620px, 94vw); padding: 18px 20px; }
+  .modal h2 { color: var(--orange); font-size: 16px; margin-bottom: 12px; }
+  .frow { display: grid; grid-template-columns: 180px 1fr; gap: 10px; align-items: start; margin-bottom: 12px; }
+  .frow label { font-weight: 800; color: #fff; padding-top: 6px; }
+  .pick { display: flex; gap: 8px; }
+  .pick select { flex: 1; min-width: 0; }
+  .frow .info { font-size: 12px; color: #fff; margin-top: 6px; line-height: 1.5; font-weight: 600; }
+  .frow .info b { color: var(--orange); }
+  .frow .info .ok { color: var(--green); }
+  .frow .info .new { color: var(--yellow); }
+  .hint.opt { margin: 0 0 6px 22px; }
+  .frow select, .frow input[type=text], .frow input[type=number] { width: 100%; background: #0a1628; color: #fff; border: 1px solid var(--blue); border-radius: 5px; padding: 6px 8px; font-size: 13px; font-family: inherit; }
+  .frow .hint { font-size: 12px; color: #fff; margin-top: 4px; line-height: 1.4; }
+  .frow .warn { color: var(--yellow); font-weight: 700; }
+  .chk { display: flex; gap: 8px; align-items: flex-start; font-weight: 700; color: #fff; padding-top: 5px; }
+  .chk input { margin-top: 3px; accent-color: var(--orange); }
+  .modal-err { color: var(--yellow); font-weight: 700; min-height: 18px; margin-bottom: 8px; }
+  .modal-actions { display: flex; justify-content: flex-end; gap: 10px; }
+
+  footer { background: #0a1628; border-top: 1px solid var(--border); text-align: center; padding: 10px 24px; font-size: 12px; color: #fff; }
+  footer a { color: var(--orange); font-weight: 700; text-decoration: none; }
+
+  @media (max-width: 900px) {
+    .header { grid-template-columns: 1fr; text-align: center; }
+    .header-left { align-items: center; }
+    .header-right { justify-content: center; }
+    .grid2 { grid-template-columns: 1fr; }
+    main { padding: 12px 16px; }
+    .frow { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ── Header (3-column FFTP standard) ── -->
+<div class="header">
+  <div class="header-left">
+    <div class="brand">F.<span>O</span>.C.U.S.<sup style="font-size:12px;color:#fff">&copy;</sup> <span style="color:#fff">— Backup</span><span class="ver">v{{ version }}</span></div>
+    <div class="hdr-subtitle">Incremental Project Backup &nbsp;&#183;&nbsp; Only New &amp; Changed Files After the First Run</div>
+    <div class="hdr-copy">&copy; 2026 Jachbit &nbsp;&#183;&nbsp; MIT License &nbsp;&#183;&nbsp; <a href="https://linktr.ee/jachbit" target="_blank">linktr.ee/jachbit</a></div>
+  </div>
+  <div class="header-center">
+    <div class="hdr-disclaimer-title">&#9888;&nbsp; Keep more than one backup.</div>
+    <div class="hdr-disclaimer-body">Provided as-is, no warranty. Check your backups.</div>
+  </div>
+  <div class="header-right">
+    <div class="hdr-clock-wrap">
+      <div style="font-size:12px;font-weight:700;color:var(--orange);letter-spacing:1px;text-transform:uppercase;">Jachbit 2026</div>
+      <div id="hdr-clock-time" style="font-size:22px;font-weight:800;color:#fff;"></div>
+      <div id="hdr-clock-date" style="font-size:12px;color:var(--bluegrey);"></div>
+    </div>
+    <button class="btn btn-outline" onclick="openSettings()">&#9881; Settings</button>
+  </div>
+</div>
+
+<main>
+  <div id="strip" class="strip">Loading…</div>
+
+  <div class="grid2">
+    <div class="panel">
+      <div class="panel-title">Backup disk <button class="btn btn-outline" style="padding:4px 10px;font-size:12px" onclick="loadDisks()">&#8635; Refresh</button></div>
+      <div id="disks"></div>
+      <div class="note" id="disk-note"></div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-title">Run <span class="sub" id="route"></span></div>
+      <div class="run-buttons">
+        <button class="btn btn-primary btn-big" id="btn-run" onclick="startRun(false)">&#11015; Back up now</button>
+        <button class="btn btn-outline btn-big" id="btn-test" onclick="startRun(true)">Test run</button>
+        <button class="btn btn-stop btn-big" id="btn-stop" onclick="stopRun()" disabled>&#9632; Stop</button>      </div>
+      <div id="progress">
+        <div class="phase">Ready.</div>
+        <div class="mathline"><b>Back up now</b> copies only new and changed files. <b>Test run</b> lists what would copy and copies nothing.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-title">History <span class="sub" id="hist-sub"></span></div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr>
+          <th>Started</th><th>Mode</th><th>Result</th>
+          <th class="num">Copied</th><th class="num">Up to date</th><th class="num">Failed</th>
+          <th class="num">Data copied</th><th class="num">Time taken</th><th>Log</th>
+        </tr></thead>
+        <tbody id="hist"></tbody>
+      </table>
+    </div>
+  </div>
+</main>
+
+<!-- ── Settings popup ── -->
+<div class="modal-bg" id="settings">
+  <div class="modal">
+    <h2>&#9881; Settings</h2>
+    <div class="frow">
+      <label>Folder to back up</label>
+      <div>
+        <div class="pick">
+          <select id="s-source-sel" onchange="onSourceSel()"></select>
+          <button class="btn btn-outline" onclick="browseSource()">&#128193; Browse…</button>
+        </div>
+        <div class="info" id="s-source-info"></div>
+      </div>
+    </div>
+    <div class="frow">
+      <label>Backup folder</label>
+      <div>
+        <select id="s-dest-sel" onchange="onDestSel()"></select>
+        <input type="text" id="s-dest" placeholder="Type a folder name, e.g. My_Projects_Backup" oninput="showDestInfo()" style="display:none;margin-top:6px"/>
+        <div class="info" id="s-dest-info"></div>
+      </div>
+    </div>
+    <div class="frow">
+      <label>Overdue after</label>
+      <div>
+        <select id="s-overdue" style="width:auto"></select>
+        <div class="hint">The top strip turns yellow when the last backup is older than this.</div>
+      </div>
+    </div>
+    <div class="frow">
+      <label>Options</label>
+      <div>
+        <label class="chk"><input type="checkbox" id="s-skip" onchange="showSourceInfo()"/> Skip rebuildable folders</label>
+        <div class="hint opt">node_modules, .venv, __pycache__ - npm / pip install puts them back.</div>
+        <label class="chk"><input type="checkbox" id="s-precheck"/> Show % progress</label>
+        <div class="hint opt">Adds about 30 s to check what changed first.</div>
+        <label class="chk"><input type="checkbox" id="s-secrets"/> Include secret files (.env, *.key, *.pem, *.token)</label>
+        <div class="hint warn opt">Off = passwords and keys never leave this PC. Turn on only if the disk is kept somewhere safe.</div>
+        <label class="chk"><input type="checkbox" id="s-mirror"/> Mirror deletes</label>
+        <div class="hint warn opt">Files you delete here are deleted from the backup too.</div>
+      </div>
+    </div>
+    <div class="modal-err" id="s-err"></div>
+    <div class="modal-actions">
+      <button class="btn btn-outline" onclick="closeSettings()">Cancel</button>
+      <button class="btn btn-primary" onclick="saveSettings()">Save</button>
+    </div>
+  </div>
+</div>
+
+<footer>
+  F.O.C.U.S.&copy; Backup &nbsp;&#183;&nbsp; &copy; 2026 Jachbit &nbsp;&#183;&nbsp; MIT License - free to use, copy and share
+  &nbsp;&nbsp;&#183;&nbsp;&nbsp;
+  <a href="https://linktr.ee/jachbit" target="_blank">linktr.ee/jachbit</a>
+</footer>
+
+<script>
+let CFG = null, DISKS = [], SEL = '', RUNNING = false, POLL = null, LAST_DONE_SHOWN = null;
+const $ = id => document.getElementById(id);
+const GB = 1024 ** 3;
+
+function fmtBytes(b) {
+  if (b == null) return '—';
+  if (b >= GB) return (b / GB).toFixed(2) + ' GB';
+  if (b >= 1024 ** 2) return (b / 1024 ** 2).toFixed(1) + ' MB';
+  if (b >= 1024) return (b / 1024).toFixed(0) + ' KB';
+  return b + ' B';
+}
+const fmtN = n => n == null ? '—' : Number(n).toLocaleString();
+function fmtDur(s) {
+  if (s == null) return '—';
+  const h = Math.floor(s / 3600), m = Math.floor(s % 3600 / 60), sec = s % 60;
+  if (h) return `${h} h ${m} min`;
+  if (m) return `${m} min ${sec} s`;
+  return `${sec} s`;
+}
+function fmtDate(iso) {
+  const d = new Date(iso);
+  if (isNaN(d)) return iso;
+  return d.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' }) +
+         ' ' + d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+}
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+
+async function api(path, body) {
+  const opt = body === undefined ? {} : { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) };
+  const r = await fetch(path, opt);
+  const j = await r.json();
+  if (!r.ok) throw new Error(j.error || r.statusText);
+  return j;
+}
+
+// ── Config ──
+async function loadConfig() {
+  const j = await api('/api/config');
+  CFG = j;
+  $('route').textContent = CFG.config.source ? `From ${CFG.config.source}` : '';
+  if (!CFG.config.source) openSettings('Set the folder you want to back up, then Save.');
+}
+// ── Settings popup ──
+let S_SIZE = null, S_DEST_FOLDERS = [], S_REQ = 0;
+const baseName = p => (p || '').replace(/[\\/]+$/, '').split(/[\\/]/).pop();
+const autoName = () => baseName(curSource()) ? baseName(curSource()) + '_Backup' : '';
+const curSource = () => { const v = $('s-source-sel').value; return v === '__browse' ? '' : v; };
+
+function fillSources(selected) {
+  const list = [selected, ...(CFG.config.recent_sources || [])].filter(Boolean);
+  const uniq = [...new Map(list.map(s => [s.toLowerCase(), s])).values()];
+  $('s-source-sel').innerHTML = (uniq.length ? '' : '<option value="">- choose a folder -</option>') +
+    uniq.map(s => `<option value="${esc(s)}">${esc(s)}</option>`).join('') +
+    '<option value="__browse">&#128193; Browse for another folder…</option>';
+  $('s-source-sel').value = selected || '';
+}
+async function browseSource() {
+  $('s-source-info').innerHTML = 'A <b>Select Folder</b> window is open - it may be behind this browser window.';
+  try {
+    const j = await api('/api/browse', { start: curSource() });
+    if (j.path) fillSources(j.path); else $('s-source-sel').value = CFG.config.source || '';
+  } catch (e) { $('s-err').textContent = e.message; }
+  showSourceInfo(); fillDest(); showDestInfo();
+}
+function onSourceSel() {
+  if ($('s-source-sel').value === '__browse') return browseSource();
+  showSourceInfo(); fillDest(); showDestInfo();
+}
+async function showSourceInfo() {
+  const p = curSource(), req = ++S_REQ;
+  S_SIZE = null;
+  if (!p) { $('s-source-info').innerHTML = 'Choose the folder you want to back up.'; showDestInfo(); return; }
+  $('s-source-info').innerHTML = 'Counting files…';
+  const skip = $('s-skip').checked;
+  const j = await api(`/api/folder_info?path=${encodeURIComponent(p)}&skip=${skip ? 1 : 0}`);
+  if (req !== S_REQ) return;
+  if (!j.ok) { $('s-source-info').innerHTML = `<span class="new">Folder not found.</span>`; showDestInfo(); return; }
+  S_SIZE = j;
+  $('s-source-info').innerHTML = `Everything inside is backed up: <b>${fmtN(j.files)} files · ${fmtBytes(j.bytes)}</b>` +
+    (skip ? ' (rebuildable folders not counted)' : '');
+  showDestInfo();
+}
+
+async function loadDestFolders() {
+  S_DEST_FOLDERS = [];
+  if (SEL) { try { S_DEST_FOLDERS = (await api('/api/dest_info?drive=' + encodeURIComponent(SEL))).folders || []; } catch (e) {} }
+}
+function fillDest(current) {
+  const auto = autoName();
+  const prev = current !== undefined ? current : ($('s-dest-sel').value === '__custom' ? '__custom'
+             : $('s-dest-sel').value === '__auto' ? '' : $('s-dest-sel').value);
+  const others = S_DEST_FOLDERS.filter(n => n.toLowerCase() !== auto.toLowerCase());
+  $('s-dest-sel').innerHTML =
+    `<option value="__auto">Automatic: ${esc(auto || '<folder name>_Backup')} (recommended)</option>` +
+    (others.length ? `<optgroup label="Already on ${SEL}">` + others.map(n => `<option value="${esc(n)}">${esc(n)}</option>`).join('') + '</optgroup>' : '') +
+    '<option value="__custom">Custom name…</option>';
+  let v = '__auto';
+  if (prev === '__custom') v = '__custom';
+  else if (prev && prev.toLowerCase() !== auto.toLowerCase()) {
+    if (others.some(n => n.toLowerCase() === prev.toLowerCase())) v = others.find(n => n.toLowerCase() === prev.toLowerCase());
+    else { v = '__custom'; $('s-dest').value = prev; }
+  }
+  $('s-dest-sel').value = v;
+  $('s-dest').style.display = v === '__custom' ? '' : 'none';
+}
+function onDestSel() {
+  $('s-dest').style.display = $('s-dest-sel').value === '__custom' ? '' : 'none';
+  if ($('s-dest-sel').value === '__custom') $('s-dest').focus();
+  showDestInfo();
+}
+function destName() {
+  const v = $('s-dest-sel').value;
+  if (v === '__auto') return autoName();
+  if (v === '__custom') return $('s-dest').value.trim();
+  return v;
+}
+function showDestInfo() {
+  const name = destName(), box = $('s-dest-info');
+  if (!name) { box.innerHTML = 'Type a name for the backup folder.'; return; }
+  if (/[\\/:*?"<>|]/.test(name)) { box.innerHTML = '<span class="new">A folder name cannot contain \\ / : * ? " &lt; &gt; |</span>'; return; }
+  if (!SEL) { box.innerHTML = `Goes to <b>&lt;disk&gt;:\\${esc(name)}</b> - plug in a disk to see if it is already there.`; return; }
+  const exists = S_DEST_FOLDERS.some(n => n.toLowerCase() === name.toLowerCase());
+  const size = S_SIZE ? ` (${fmtBytes(S_SIZE.bytes)})` : '';
+  box.innerHTML = `Backup goes to <b>${SEL}\\${esc(name)}</b>, logs to <b>${SEL}\\${esc(name)}_logs</b><br>` + (exists
+    ? '<span class="ok">&#10003; Already there - only new and changed files will copy.</span>'
+    : `<span class="new">New folder - created by itself on the first backup, which copies everything${size}.</span>`);
+}
+
+async function openSettings(msg) {
+  const c = CFG.config;
+  fillSources(c.source);
+  const days = [1, 3, 7, 14, 30];
+  if (!days.includes(c.overdue_days)) days.push(c.overdue_days);
+  $('s-overdue').innerHTML = days.sort((a, b) => a - b).map(d => `<option value="${d}">${d} day${d === 1 ? '' : 's'}${d === 7 ? ' (default)' : ''}</option>`).join('');
+  $('s-overdue').value = c.overdue_days;
+  $('s-dest').value = '';
+  $('s-skip').checked = c.skip_rebuildable;
+  $('s-precheck').checked = c.precheck;
+  $('s-secrets').checked = c.include_secrets;
+  $('s-mirror').checked = c.mirror;
+  $('s-err').textContent = msg || '';
+  $('settings').classList.add('show');
+  await loadDestFolders();
+  fillDest(c.dest_folder);
+  showDestInfo();
+  showSourceInfo();
+}
+function closeSettings() {
+  if (!CFG.config.source) { $('s-err').textContent = 'A folder to back up is needed before the first backup.'; return; }
+  $('settings').classList.remove('show');
+}
+async function saveSettings() {
+  try {
+    if (!curSource()) throw new Error('Choose the folder to back up first.');
+    const name = destName();
+    if (!name) throw new Error('Type a name for the backup folder.');
+    CFG = await api('/api/config', {
+      source: curSource(), dest_folder: $('s-dest-sel').value === '__auto' ? '' : name,
+      overdue_days: parseInt($('s-overdue').value || '7', 10),
+      skip_rebuildable: $('s-skip').checked, precheck: $('s-precheck').checked,
+      include_secrets: $('s-secrets').checked, mirror: $('s-mirror').checked,
+    });
+    $('settings').classList.remove('show');
+    $('route').textContent = `From ${CFG.config.source}`;
+    await loadDisks();
+  } catch (e) { $('s-err').textContent = e.message; }
+}
+
+// ── Disks ──
+async function loadDisks() {
+  const j = await api('/api/disks');
+  DISKS = j.disks;
+  const letters = DISKS.map(d => d.drive);
+  if (!letters.includes(SEL)) SEL = letters.includes(j.last_drive) ? j.last_drive : (letters[0] || '');
+  const box = $('disks');
+  if (!DISKS.length) {
+    box.innerHTML = `<div class="empty">No backup disk connected.<br>Plug in the external disk and wait until it shows in File Explorer → This PC. This list refreshes by itself.</div>`;
+  } else {
+    box.innerHTML = DISKS.map(d => `
+      <label class="disk ${d.drive === SEL ? 'sel' : ''}" onclick="selDisk('${d.drive}')">
+        <input type="radio" name="disk" ${d.drive === SEL ? 'checked' : ''}/>
+        <div>
+          <div class="name">${d.drive} &nbsp;${esc(d.label)}
+            <span class="tag ${d.has_backup ? 'has' : 'new'}">${d.has_backup ? 'has a backup' : 'no backup yet - first run copies everything'}</span></div>
+          <div class="meta">${d.free_gb.toLocaleString()} GB free of ${d.total_gb.toLocaleString()} GB &nbsp;·&nbsp; ${esc(d.fs)} &nbsp;·&nbsp; ${d.type}</div>
+        </div>
+      </label>`).join('');
+  }
+  $('disk-note').innerHTML = `Not listed: the source disk <b>${j.source_drive || '—'}</b> and the Windows disk <b>${j.system_drive}</b>.`;
+  setButtons();
+  loadHistory();
+}
+function selDisk(d) { if (RUNNING || d === SEL) return; SEL = d; loadDisks(); }
+
+function setButtons() {
+  const can = !RUNNING && SEL && CFG && CFG.config.source;
+  $('btn-run').disabled = !can;
+  $('btn-test').disabled = !can;  $('btn-stop').disabled = !RUNNING;
+}
+
+// ── History + overdue strip ──
+async function loadHistory() {
+  const j = await api('/api/history?drive=' + encodeURIComponent(SEL));
+  const runs = j.runs || [];
+  const label = (DISKS.find(d => d.drive === j.drive) || {}).label;
+  $('hist-sub').textContent = !j.drive ? '' : j.live
+    ? `${runs.length} run${runs.length === 1 ? '' : 's'} · from the log folder on ${j.drive}${label ? ' ' + label : ''}`
+    : `${runs.length} run${runs.length === 1 ? '' : 's'} · disk ${j.drive} not connected, showing what was saved ${j.saved ? fmtDate(j.saved) : ''}`;
+  $('hist').innerHTML = runs.length ? runs.map(r => {
+    let res, cls;
+    if (!r.finished) { res = 'Stopped'; cls = 'r-warn'; }
+    else if (r.files_failed) { res = `${r.files_failed} failed`; cls = 'r-warn'; }
+    else if (r.mode === 'Test run') { res = `Would copy ${fmtN(r.files_copied)}`; cls = 'r-test'; }    else if (!r.files_copied) { res = 'Up to date'; cls = 'r-ok'; }
+    else { res = 'OK'; cls = 'r-ok'; }
+    return `<tr>
+      <td>${fmtDate(r.started)}</td><td>${r.mode}</td><td class="${cls}">${res}</td>
+      <td class="num">${fmtN(r.files_copied)}</td><td class="num">${fmtN(r.files_skipped)}</td><td class="num">${fmtN(r.files_failed)}</td>
+      <td class="num">${fmtBytes(r.bytes_copied)}</td><td class="num">${fmtDur(r.seconds)}</td><td>${esc(r.log)}</td></tr>`;
+  }).join('') : `<tr><td colspan="9" style="color:var(--yellow)">No backups on this disk yet.</td></tr>`;
+
+  const strip = $('strip');
+  const limit = CFG ? CFG.config.overdue_days : 7;
+  const last = runs.find(r => r.mode !== 'Test run' && r.finished);
+  if (!last) {
+    strip.className = 'strip overdue';
+    strip.innerHTML = `No finished backup found${j.drive ? ' for ' + j.drive : ''} yet.<span class="math">Run Back up now - the first run copies everything, later runs only what changed.</span>`;
+    return;
+  }
+  const ended = new Date(new Date(last.started).getTime() + (last.seconds || 0) * 1000);
+  const days = Math.floor((Date.now() - ended) / 86400000);
+  const over = days > limit;
+  strip.className = 'strip ' + (over ? 'overdue' : 'ok');
+  strip.innerHTML = `${over ? '&#9888; Backup overdue' : '<b>&#10003; Backup up to date</b>'} &nbsp;·&nbsp; last backup ${fmtDate(ended.toISOString())} on ${j.drive}` +
+    `<span class="math">${days} day${days === 1 ? '' : 's'} ago ${over ? '&gt;' : '&le;'} limit ${limit} days (set in Settings) &nbsp;·&nbsp; it copied ${fmtN(last.files_copied)} files, ${fmtBytes(last.bytes_copied)} in ${fmtDur(last.seconds)}</span>`;
+}
+
+// ── Run ──
+async function startRun(test) {
+  if (!SEL) return;
+  if (!test && CFG.config.mirror && !confirm(`Mirror is ON: files deleted from ${CFG.config.source} will also be deleted from the backup on ${SEL}. Continue?`)) return;
+  try {
+    await api('/api/run', { drive: SEL, test });
+    RUNNING = true; setButtons(); pollStatus();
+  } catch (e) { $('progress').innerHTML = `<div class="phase done-warn">${esc(e.message)}</div>`; }
+}
+async function stopRun() { await api('/api/stop', {}); }
+
+function pollStatus() {
+  clearTimeout(POLL);
+  api('/api/status').then(s => {
+    const wasRunning = RUNNING;
+    renderStatus(s);
+    if (s.running) POLL = setTimeout(pollStatus, 1000);
+    else if (wasRunning) { RUNNING = false; setButtons(); loadDisks(); }
+  }).catch(() => { POLL = setTimeout(pollStatus, 3000); });
+}
+
+function renderStatus(s) {
+  if (!s.phase) return;
+  RUNNING = !!s.running; setButtons();
+  const verb = s.test ? 'would copy' : 'copied';
+  const what = s.test ? 'Test run' : 'Backup';
+  let html = '';
+  if (s.running && (s.phase === 'start' || s.phase === 'check')) {
+    html = `<div class="phase">Step 1 of 2 - checking what changed… (${fmtDur(s.elapsed)})</div>
+      <div class="bar indet"><div></div></div>
+      <div class="mathline">Comparing every file in the folder with the copy on ${s.drive}. Nothing is copied in this step.</div>`;
+  } else if (s.running) {
+    const step = s.files_total != null ? 'Step 2 of 2 - ' : '';
+    let pct = null, math = `<b>${fmtBytes(s.bytes_done)}</b> ${verb} so far · ${fmtN(s.files_done)} files · ${fmtDur(s.elapsed)}`;
+    if (s.bytes_total != null) {
+      pct = s.bytes_total ? Math.min(100, s.bytes_done / s.bytes_total * 100) : 100;
+      math = `${fmtBytes(s.bytes_done)} of ${fmtBytes(s.bytes_total)} to copy = <b>${pct.toFixed(1)}%</b> &nbsp;·&nbsp; ` +
+             `${fmtN(s.files_done)} of ${fmtN(s.files_total)} files &nbsp;·&nbsp; ${fmtDur(s.elapsed)}`;
+    }
+    html = `<div class="phase">${step}${s.test ? 'listing' : 'copying'} new &amp; changed files to ${s.drive}…</div>
+      <div class="bar ${pct == null ? 'indet' : ''}"><div style="${pct == null ? '' : 'width:' + pct + '%'}"></div></div>
+      <div class="mathline">${math}</div>
+      <div class="recent">${(s.recent || []).map(f => `<div>${esc(f)}</div>`).join('')}</div>`;
+  } else if (s.phase === 'done') {
+    const f = (s.summary || {}).files, b = (s.summary || {}).bytes;
+    const warn = s.rc == null || s.rc >= 8;
+    const rcText = s.test && (s.rc === 1 || s.rc === 3) ? 'New / changed files found - nothing was copied' : s.rc_text;
+    html = `<div class="phase ${warn ? 'done-warn' : 'done-ok'}">${what} finished - ${esc(rcText)} (${fmtDur(s.seconds)})</div>`;
+    if (f) {
+      html += `<div class="mathline">Checked <b>${fmtN(f.total)}</b> files = ${fmtN(f.copied)} ${verb} + ${fmtN(f.skipped)} already up to date + ${fmtN(f.failed)} failed` +
+              (f.extras ? ` · ${fmtN(f.extras)} files kept in the backup that were deleted here` : '') + `</div>`;
+      if (b) html += `<div class="mathline">Data ${verb}: <b>${fmtBytes(b.copied)}</b> of ${fmtBytes(b.total)} in the folder</div>`;
+    }
+    if (s.rc == null) html += `<div class="mathline">${s.test ? 'Stopped by you. Nothing was copied.' : 'Stopped by you. Files already copied stay on the disk; the next run picks up the rest.'}</div>`;
+    if (s.rc >= 8) html += `<div class="mathline">Usually a file open in another program, or one a program deleted while the backup ran. Run again to retry.</div>`;
+    html += `<div class="mathline">Log: ${esc(s.log || '')}</div>`;
+  }
+  if ((s.failed_files || []).length) {
+    html += `<div class="failed">Could not copy (${s.failed_files.length}):${s.failed_files.map(f => `<div>${esc(f)}</div>`).join('')}</div>`;
+  }
+  $('progress').innerHTML = html;
+}
+
+// ── Clock (ET) ──
+(function () {
+  function tick() {
+    const et = new Date(new Date().toLocaleString('en-US', { timeZone: 'America/New_York' }));
+    let h = et.getHours() % 12 || 12;
+    $('hdr-clock-time').textContent = [h, et.getMinutes(), et.getSeconds()].map(v => String(v).padStart(2, '0')).join(':');
+    const days = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+    const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    $('hdr-clock-date').textContent = `${days[et.getDay()]}, ${months[et.getMonth()]} ${et.getDate()} | ET`;
+  }
+  tick(); setInterval(tick, 1000);
+})();
+
+(async function init() {
+  await loadConfig();
+  await loadDisks();
+  pollStatus();
+  setInterval(() => { if (!RUNNING) loadDisks(); }, 5000);
+})();
+</script>
+</body>
+</html>
